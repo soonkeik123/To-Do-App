@@ -15,6 +15,14 @@ class _HomeState extends State<Home> {
   final List<ToDo> _todos = ToDo.todoList();
   final _toDoController = TextEditingController();
 
+  List<ToDo> _foundToDo = [];
+
+  @override
+  void initState() {
+    _foundToDo = _todos;
+    super.initState();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -39,7 +47,7 @@ class _HomeState extends State<Home> {
                         ),
                       ),
                       // todoo is for distinguish, it is also ToDo data
-                      for (ToDo todoo in _todos)
+                      for (ToDo todoo in _foundToDo.reversed)
                         ToDoItem(
                           todo: todoo,
                           onToDoChanged: _handleToDoChange,
@@ -133,6 +141,23 @@ class _HomeState extends State<Home> {
     _toDoController.clear();
   }
 
+  void _runFilter(String enteredKeyword) {
+    List<ToDo> result = [];
+    if (enteredKeyword.isEmpty) {
+      result = _todos;
+    } else {
+      result = _todos
+          .where((item) => item.todoText!
+              .toLowerCase()
+              .contains(enteredKeyword!.toLowerCase()))
+          .toList();
+    }
+
+    setState(() {
+      _foundToDo = result;
+    });
+  }
+
   AppBar _buildAppBar() {
     return AppBar(
       backgroundColor: tdBGColor,
@@ -157,22 +182,16 @@ class _HomeState extends State<Home> {
       ),
     );
   }
-}
 
-class searchBox extends StatelessWidget {
-  const searchBox({
-    super.key,
-  });
-
-  @override
-  Widget build(BuildContext context) {
+  Widget searchBox() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
       ),
-      child: const TextField(
+      child: TextField(
+        onChanged: (value) => _runFilter(value),
         decoration: InputDecoration(
             contentPadding: EdgeInsets.all(0),
             prefixIcon: Icon(
